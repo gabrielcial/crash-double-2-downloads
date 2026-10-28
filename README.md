@@ -1,25 +1,33 @@
-# Crash Bandicoot Double 2 — Windows preview v0.2.0
+# Crash Bandicoot Double 2 — Windows preview v0.3.0
 
 Download **CrashDouble2.exe**, open it on Windows 10/11 (64-bit), and choose your own original **Crash Bandicoot 2: Cortex Strikes Back USA / SCUS-94154 BIN**. The portable app includes the emulator and multiplayer integration. It does not include a game disc or BIOS, upload your BIN, or modify your original file.
 
-- **Player-hosted rooms for up to five participants.** The host's PC coordinates the shared game state. Each player runs their own game locally. The public service handles room discovery, connection signalling and host leases.
-- **Automatic host transfer.** If the host leaves, a participant with a current replica can take over. Among equally current copies, selection considers measured connectivity, latency, jitter and packet loss. A sudden loss requires the host lease to expire and can briefly pause synchronization.
-- **Personal Wumpas remain personal.** Shared crate state and the existing cooperative modifications are retained.
-- **Windows launcher with the pixel Crash life icon**, keyboard/controller support and microphone permission controls. The game viewport fits the window while keeping its 4:3 proportions. The joined-room counter uses the authoritative room state, including on guests.
-- **The website is now a download page.** It does not start the emulator or poll the game APIs. Executable downloads are delivered through GitHub Releases.
+This version moves room discovery and coordination to Cloudflare. **All participants must update to 0.3.0**: previous versions use the old directory and cannot see these new rooms.
 
-The executable is not digitally signed. `SHA256SUMS.txt` is included so the downloaded file can be checked against this release.
+- **Five participants per room**, including the host. Each player runs the game locally; game state and replicas travel between participants.
+- **WebSocket room updates** replace recurring HTTP synchronization. Outside a room, the app makes no periodic room-directory requests. Open Search Server or press Refresh to find rooms.
+- **Separate SQLite storage for each room** through Cloudflare Durable Objects. Routine presence updates do not rewrite the database of all rooms. Inactive rooms expire and disappear from discovery.
+- **Automatic host transfer** retains the most recent replica and considers connection quality among equally current candidates. A sudden host disconnect may pause synchronization until the 18-second host lease expires.
+- **Personal Wumpas remain personal.** The existing crate and cooperative game behavior is retained.
+
+The website is a static download and instructions page; downloads come from GitHub Releases. No Supabase credentials or Cloudflare account credentials are embedded in the app.
 
 ## Playing together
 
-Each player opens the app and loads their own compatible BIN. At Coco's camp, enter a player name and choose **Create Server** or **Search Server**. The host sets the limit to 2–5 players and selects **Start adventure** when everyone is ready. Enable the microphone only if you want voice chat.
+Each player opens the updated app and loads their own compatible BIN. At Coco's camp, enter a name and choose **Create Server** or **Search Server**. The host sets the limit to 2–5 players and selects **Start adventure** when everyone is ready. Enable the microphone only if you want voice chat.
 
-## Validation and current scope
+The executable is not digitally signed. `SHA256SUMS.txt` identifies the released file.
 
-Two packaged Electron instances on the same PC joined one room, displayed both players together at Coco's camp, and entered the playing state. Closing the host window transferred that same room to the remaining player, who stayed in the game as the new host. This used real local WebRTC connections and a local directory service.
+## Scope
 
-Automated tests exercised five desktop engines, shared facts, replica transfer, connection-based election, abrupt host loss, stale authority rejection, token recovery and cross-instance directory storage. These tests do **not** establish five independent players across the internet, all router/NAT configurations, or smooth performance on every PC. Direct connectivity or a configured TURN relay is still required. The complete cooperative campaign remains a work in progress.
+The complete cooperative campaign remains a work in progress. Direct WebRTC connectivity or a configured TURN relay is required; this migration does not guarantee connectivity through every router, NAT or carrier network.
 
 This is an unofficial fan modification. Crash Bandicoot and the original game's code, characters, artwork, music and other assets belong to their respective rights holders. The download does not grant rights to the original game.
 
-[Download for Windows](https://github.com/gabrielcial/crash-double-2-downloads/releases/latest/download/CrashDouble2.exe) · [Website](https://crash-bandicoot-2-online-brown.vercel.app/)
+## Validation before release
+
+The packaged 0.3.0 executable was tested with two independent emulator windows on one Windows PC against the public Cloudflare service: both players joined Coco's camp, appeared together, started the same adventure, and the guest became host in the same ongoing room after the original host window closed. This is not a test across two household networks or five simultaneous emulators.
+
+Five controlled clients also passed capacity, reconnect, stale-host rejection, and graceful/abrupt host migration checks. Existing game/server regression tests passed 336/336; desktop transport tests passed 23/23; Worker tests passed 13/13.
+
+[Download for Windows](https://github.com/gabrielcial/crash-double-2-downloads/releases/latest/download/CrashDouble2.exe) · [Website](https://crash-double-2-directory.gabrielcavalcanteoficial.workers.dev/)
